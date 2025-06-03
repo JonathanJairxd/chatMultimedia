@@ -1,0 +1,7 @@
+{
+  "name": "chatLoginSupa",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
