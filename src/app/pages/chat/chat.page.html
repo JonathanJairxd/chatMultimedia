@@ -10,8 +10,14 @@
     <div class="message-bubble">
       <img *ngIf="msg.profiles?.avatar_url" [src]="msg.profiles.avatar_url" alt="avatar" class="avatar-img" />
       <div class="message-user">{{ msg.profiles?.name || msg.username || msg.user_id }}</div>
-      
-      <div class="message-text" [innerHTML]="formatMessageContent(msg.content)"></div>
+
+      <div class="message-text" *ngIf="!isImageMessage(msg.content); else imageTpl"
+        [innerHTML]="formatMessageContent(msg.content)"></div>
+
+      <ng-template #imageTpl>
+        <img [src]="extractImageUrl(msg.content)" style="max-width: 200px; border-radius: 8px;" />
+      </ng-template>
+
 
       <div class="message-time">{{ msg.inserted_at | date:'shortTime' }}</div>
     </div>
@@ -29,6 +35,11 @@
       <ion-button (click)="sendLocation()" color="tertiary" size="small">Enviar Ubicación</ion-button>
       <ion-button (click)="sendGhibliInfo()" color="success" size="small">
         Enviar Película Ghibli
+      </ion-button>
+
+      <!-- Botón para capturar foto -->
+      <ion-button (click)="captureAndSendPhoto()" color="dark" size="small" style="margin-left: 8px;">
+        <ion-icon name="camera"></ion-icon>
       </ion-button>
 
 

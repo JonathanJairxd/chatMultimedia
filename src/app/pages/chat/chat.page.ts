@@ -8,6 +8,11 @@ import { Subscription } from 'rxjs';
 //Para usar firebase
 import { Firestore, collection, addDoc } from '@angular/fire/firestore';
 
+// Para la captura y envio de la foto
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { getStorage, ref, uploadString, getDownloadURL } from '@angular/fire/storage';
+
+
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.page.html',
@@ -190,6 +195,70 @@ export class ChatPage implements OnInit, OnDestroy {
 
     return formatted;
   }
+
+  // Para capturar la foto
+
+  async captureAndSendPhoto() {
+  const user = this.supabase.currentUser.value;
+  if (!user) {
+    alert('No hay usuario logueado. Por favor inicia sesión.');
+    return;
+  }
+
+  try {
+    // Captura la foto
+    const photo = await Camera.getPhoto({
+      quality: 70,
+      allowEditing: false,
+      resultType: CameraResultType.Base64,
+      source: CameraSource.Camera,
+    });
+
+    if (!photo || !photo.base64String) {
+      alert('No se pudo capturar la foto');
+      return;
+    }
+
+    // Sube la imagen a Firebase Storage
+    const storage = getStorage();
+    const fileName = `chat_photos/${user.id}_${new Date().getTime()}.jpeg`;
+    const storageRef = ref(storage, fileName);
+
+    // Subimos como base64
+    await uploadString(storageRef, photo.base64String, 'base64', {
+      contentType: 'image/jpeg',
+    });
+
+    // Obtenemos URL de descarga
+    const downloadURL = await getDownloadURL(storageRef);
+
+    // Guardamos el mensaje en Supabase con el link de la imagen
+    const content = `📷 Foto: ${downloadURL}`;
+
+    const { data, error } = await this.supabase.supabase
+      .from('messages')
+      .insert([{ user_id: user.id, content }]);
+
+    if (error) {
+      alert('Error enviando la foto: ' + error.message);
+      return;
+    }
+
+  } catch (error) {
+    console.error('Error al capturar o subir la foto:', error);
+    alert('Error al capturar o enviar la foto');
+  }
+}
+
+isImageMessage(content: string): boolean {
+  // Revisa si el mensaje tiene un link de foto (ejemplo que empieza con 📷 Foto: http)
+  return content.startsWith('📷 Foto: http');
+}
+
+extractImageUrl(content: string): string {
+  // Extrae la url de la foto desde el mensaje
+  return content.replace('📷 Foto: ', '').trim();
+}
 
 
 
