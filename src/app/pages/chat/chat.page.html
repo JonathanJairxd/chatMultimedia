@@ -5,9 +5,11 @@
 </ion-header>
 
 <ion-content class="ion-padding chat-content" [scrollEvents]="true" #content>
-  <div *ngFor="let msg of messages" [ngClass]="{'my-message': msg.user_id === supabase.currentUser.value?.id, 'other-message': msg.user_id !== supabase.currentUser.value?.id}">
+  <div *ngFor="let msg of messages"
+    [ngClass]="{'my-message': msg.user_id === supabase.currentUser.value?.id, 'other-message': msg.user_id !== supabase.currentUser.value?.id}">
     <div class="message-bubble">
-      <div class="message-user">{{ msg.username || msg.user_id }}</div>
+      <img *ngIf="msg.profiles?.avatar_url" [src]="msg.profiles.avatar_url" alt="avatar" class="avatar-img" />
+      <div class="message-user">{{ msg.profiles?.name || msg.username || msg.user_id }}</div>
       <div class="message-text">{{ msg.content }}</div>
       <div class="message-time">{{ msg.inserted_at | date:'shortTime' }}</div>
     </div>
@@ -17,13 +19,14 @@
 <ion-footer>
   <ion-toolbar>
     <ion-item>
-      <ion-input
-        placeholder="Escribe un mensaje..."
-        [(ngModel)]="newMessage"
-        (keyup.enter)="sendMessage()"
-        clearInput
-      ></ion-input>
+      <ion-input placeholder="Escribe un mensaje..." [(ngModel)]="newMessage" (keyup.enter)="sendMessage()"
+        clearInput></ion-input>
       <ion-button (click)="sendMessage()" color="primary">Enviar</ion-button>
+      <ion-button (click)="getCurrentLocation()" color="medium" size="small" style="margin-right: 8px;">Obtener
+        Ubicación</ion-button>
+      <ion-button (click)="sendLocation()" color="tertiary" size="small">Enviar Ubicación</ion-button>
+
+
     </ion-item>
   </ion-toolbar>
 </ion-footer>
