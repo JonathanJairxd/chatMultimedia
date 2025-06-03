@@ -145,4 +145,52 @@ export class ChatPage implements OnInit, OnDestroy {
     this.longitude = null;
     return data;
   }
+
+  // Para consumir la api
+
+  async sendGhibliInfo() {
+    const user = this.supabase.currentUser.value;
+    if (!user) {
+      alert('No user logged in');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://ghibliapi.vercel.app/films');
+      const films = await response.json();
+
+      const film = films[Math.floor(Math.random() * films.length)];
+      const title = film.title;
+      const description = film.description;
+      const director = film.director;
+      const release_date = film.release_date;
+
+      const content = `🎬 *${title}*\n🧑‍🎨 Director: ${director}\n🗓 Año: ${release_date}\n📝 ${description.substring(0, 150)}...`;
+
+
+      const { data: insertData, error } = await this.supabase.supabase
+        .from('messages')
+        .insert([{ user_id: user.id, content }]);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error('Error al obtener datos de Ghibli:', err);
+      alert('No se pudo obtener la película de Ghibli');
+    }
+  }
+
+  formatMessageContent(content: string): string {
+    if (!content) return '';
+
+    // Convertir saltos de línea a <br>
+    let formatted = content.replace(/\n/g, '<br>');
+
+    // Convertir *texto* en negrita <strong>texto</strong>
+    formatted = formatted.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+
+    return formatted;
+  }
+
+
+
 }

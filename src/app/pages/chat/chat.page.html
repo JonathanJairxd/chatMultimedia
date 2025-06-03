@@ -10,7 +10,9 @@
     <div class="message-bubble">
       <img *ngIf="msg.profiles?.avatar_url" [src]="msg.profiles.avatar_url" alt="avatar" class="avatar-img" />
       <div class="message-user">{{ msg.profiles?.name || msg.username || msg.user_id }}</div>
-      <div class="message-text">{{ msg.content }}</div>
+      
+      <div class="message-text" [innerHTML]="formatMessageContent(msg.content)"></div>
+
       <div class="message-time">{{ msg.inserted_at | date:'shortTime' }}</div>
     </div>
   </div>
@@ -25,6 +27,9 @@
       <ion-button (click)="getCurrentLocation()" color="medium" size="small" style="margin-right: 8px;">Obtener
         Ubicación</ion-button>
       <ion-button (click)="sendLocation()" color="tertiary" size="small">Enviar Ubicación</ion-button>
+      <ion-button (click)="sendGhibliInfo()" color="success" size="small">
+        Enviar Película Ghibli
+      </ion-button>
 
 
     </ion-item>
